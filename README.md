@@ -1,6 +1,6 @@
 # Youtube Alert
 
-Python script that sends a Telegram message to a specified chat when a new video is uploaded to a YouTube channel. Automatically downloads english captions and summarises it using ollama tinyllama.
+Python script that sends a Telegram message to a specified chat when a new video is uploaded to a YouTube channel. Automatically downloads english captions and summarises it using any Ollama served LLMs.
 
 ## Usage
 
@@ -14,9 +14,10 @@ python main.py
 
 ## Requirements
 
-[dipzy](https://github.com/uuaxe/dipzy) library
+- [dipzy](https://github.com/uuaxe/dipzy) python library
+- [Ollama](https://github.com/ollama/ollama-python) python library
 
 ## TODO
 
-- [ ] Add feature to summarise captions using the ollama API
+- [x] Add feature to summarise captions using ollama served LLMs 
 - [ ] Fix ValueError: I/O operation on closed file when updating the latest videos of two channels
