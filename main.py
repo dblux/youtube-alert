@@ -73,10 +73,17 @@ def get_captions(video_id, language="en"):
     return captions
 
 
-def summarise(text, model="llama3", num_ctx=8000):
+def summarise(text, model="llama3", num_ctx=8000, pagelimit=None):
     '''Summarise text using ollama served locally run LLM
 
     Assumption: Ollama is serving the specified model!
+
+    Args:
+        text (str): Text to be summarised.
+        model: Name of LLM model served by Ollama.
+        num_ctx: Context size (tokens) to pass to Ollama.
+        pagelimit: Number of pages to summarise. Tokens per page is around
+            three quarters of num_ctx.
     '''
     reply_limit = 600 # +50% buffer
     if num_ctx > LLM_CTX[model]:
@@ -97,9 +104,11 @@ def summarise(text, model="llama3", num_ctx=8000):
             f"Text divided into {len(pages)} pages containing {nwords_page} words."
         ))
         responses = []
+        pages = pages if pagelimit is None else pages[:pagelimit]
+        logger.info(f"Summarising {len(pages)} page/s!")
         for page in pages:
             prompt = "Summarise the following text: " + page
-            logger.info("Requesting ollama API...")
+            logger.info("Requesting Ollama API...")
             responses.append(ollama.chat(
                 model=model,
                 messages=[{"role": "user", "content": prompt}],
@@ -110,7 +119,7 @@ def summarise(text, model="llama3", num_ctx=8000):
         return summarise(content, model, num_ctx)
     else:
         prompt = "Summarise the following text: " + text
-        logger.info("Requesting ollama API...")
+        logger.info("Requesting Ollama API...")
         response = ollama.chat(
             model=model,
             messages=[{"role": "user", "content": prompt}],
@@ -158,6 +167,7 @@ if __name__ == "__main__":
             logger.info(f"Saved captions to {ofile}.")
             # Summarise captions and send message
             summary = summarise(captions, "mistral-nemo", 16000)
+            rsummary = re.escape(summary).replace("!", "\\!")
             bot.send_message(
-                chat_id, re.escape(summary), parse_mode="MarkdownV2"
+                chat_id, rsummary, parse_mode="MarkdownV2"
             )
